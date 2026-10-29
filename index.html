@@ -103,6 +103,7 @@
 <script>
     let qrcodeContainer = document.getElementById("qrcode");
     let qrInstance = null;
+    let tistoryWindow = null; // <-- 누락되었던 tistoryWindow 변수 추가
 
     // 페이지가 로드될 때 세션 스토리지에 저장된 값이 있으면 입력창에 복원
     window.onload = function() {
@@ -145,6 +146,7 @@
         if (tistoryWindow) {
             tistoryWindow.focus();
         }
+
         // vCard 표준 포맷
         const vcardData = [
             'BEGIN:VCARD',
