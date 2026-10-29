@@ -114,9 +114,8 @@
             }
         });
 
-        // 이전 세션에 저장된 데이터가 있으면 자동 QR 생성 (새 탭은 안 열림)
         if (sessionStorage.getItem('name') || sessionStorage.getItem('phone')) {
-            generateQR(false);
+            generateQR(false); // 자동 실행 시에는 링크를 열지 않음
         }
     };
 
@@ -136,13 +135,15 @@
             return;
         }
 
-        // 버튼 클릭 시 새 탭을 열고 즉시 현재 창으로 포커스 복귀
+        // window.open 대신 가상의 <a> 태그를 만들어 클릭하는 방식 (현재 창 포커스 유지)
         if (openTab) {
-            const newTab = window.open('https://openable73.tistory.com/456', '_blank');
-            if (newTab) {
-                newTab.blur();
-                window.focus();
-            }
+            const link = document.createElement('a');
+            link.href = 'https://openable73.tistory.com/456';
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // vCard 표준 포맷
