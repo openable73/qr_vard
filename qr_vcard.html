@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>명함 QR 코드 생성기</title>
+    <!-- 한글 및 vCard를 완벽 지원하는 최신 QR 코드 라이브러리(EasyQRCodeJS) 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f5f7fb;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 350px;
+            text-align: center;
+        }
+        h2 { margin-bottom: 20px; color: #333; }
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        #qrcode {
+            margin: 25px auto;
+            display: flex;
+            justify-content: center;
+        }
+        #downloadBtn {
+            background-color: #28a745;
+            display: none;
+        }
+        #downloadBtn:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>QR 코드 생성기</h2>
+    
+    <div class="input-group">
+        <label for="name">이름</label>
+        <input type="text" id="name" placeholder="홍길동" oninput="saveInputValue('name')">
+    </div>
+    <div class="input-group">
+        <label for="phone">연락처</label>
+        <input type="text" id="phone" placeholder="010-1234-5678" oninput="saveInputValue('phone')">
+    </div>
+    <div class="input-group">
+        <label for="homepage">홈페이지</label>
+        <input type="url" id="homepage" placeholder="https://example.com" oninput="saveInputValue('homepage')">
+    </div>
+    <div class="input-group">
+        <label for="email">이메일</label>
+        <input type="email" id="email" placeholder="user@example.com" oninput="saveInputValue('email')">
+    </div>
+
+    <button onclick="generateQR()">QR 코드 만들기</button>
+    
+    <div id="qrcode"></div>
+    
+    <button id="downloadBtn" onclick="downloadQR()">PNG 이미지 다운로드</button>
+</div>
+
+<script>
+    let qrcodeContainer = document.getElementById("qrcode");
+    let qrInstance = null;
+
+    // 페이지가 로드될 때 세션 스토리지에 저장된 값이 있으면 입력창에 복원
+    window.onload = function() {
+        const fields = ['name', 'phone', 'homepage', 'email'];
+        fields.forEach(field => {
+            const savedValue = sessionStorage.getItem(field);
+            if (savedValue !== null) {
+                document.getElementById(field).value = savedValue;
+            }
+        });
+
+        // 만약 이전 세션에 입력된 값이 있었다면 자동으로 QR 코드도 같이 생성해두기
+        if (sessionStorage.getItem('name') || sessionStorage.getItem('phone')) {
+            generateQR();
+        }
+    };
+
+    // 입력값이 바뀔 때마다 세션 스토리지에 즉시 저장
+    function saveInputValue(fieldId) {
+        const value = document.getElementById(fieldId).value;
+        sessionStorage.setItem(fieldId, value);
+    }
+
+    function generateQR() {
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const homepage = document.getElementById("homepage").value.trim();
+        const email = document.getElementById("email").value.trim();
+
+        if(!name && !phone && !homepage && !email) {
+            alert("최소 한 개의 정보는 입력해주세요.");
+            return;
+        }
+
+        // vCard 표준 포맷
+        const vcardData = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `N:${name}`,
+            `FN:${name}`,
+            `TEL:${phone}`,
+            `URL:${homepage}`,
+            `EMAIL:${email}`,
+            'END:VCARD'
+        ].join('\n');
+
+        qrcodeContainer.innerHTML = "";
+
+        try {
+            const options = {
+                text: vcardData,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            };
+
+            qrInstance = new QRCode(qrcodeContainer, options);
+            document.getElementById("downloadBtn").style.display = "block";
+        } catch (error) {
+            console.error("QR 생성 오류:", error);
+            alert("QR 코드를 생성하는 동안 문제가 발생했습니다.");
+        }
+    }
+
+    function downloadQR() {
+        const qrCanvas = qrcodeContainer.querySelector("canvas");
+        const qrImg = qrcodeContainer.querySelector("img");
+        
+        if (qrCanvas) {
+            const imgUrl = qrCanvas.toDataURL("image/png");
+            triggerDownload(imgUrl);
+        } else if (qrImg) {
+            triggerDownload(qrImg.src);
+        } else {
+            alert("QR 코드를 먼저 생성해주세요.");
+        }
+    }
+
+    function triggerDownload(url) {
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = "my_qrcode.png";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+</script>
+
+</body>
+</html>
