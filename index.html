@@ -103,7 +103,6 @@
 <script>
     let qrcodeContainer = document.getElementById("qrcode");
     let qrInstance = null;
-    let tistoryWindow = null; // <-- 누락되었던 tistoryWindow 변수 추가
 
     // 페이지가 로드될 때 세션 스토리지에 저장된 값이 있으면 입력창에 복원
     window.onload = function() {
@@ -136,15 +135,6 @@
         if(!name && !phone && !homepage && !email) {
             alert("최소 한 개의 정보는 입력해주세요.");
             return;
-        }
-
-        if (!tistoryWindow || tistoryWindow.closed) {
-            tistoryWindow = window.open('https://openable73.tistory.com/456', 'tistoryWindow');
-        }
-        
-        // 창이 활성화(포커스)되도록 유도
-        if (tistoryWindow) {
-            tistoryWindow.focus();
         }
 
         // vCard 표준 포맷
