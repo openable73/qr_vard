@@ -114,9 +114,9 @@
             }
         });
 
-        // 만약 이전 세션에 입력된 값이 있었다면 자동으로 QR 코드도 같이 생성해두기
+        // 만약 이전 세션에 입력된 값이 있었다면 자동으로 QR 코드도 같이 생성
         if (sessionStorage.getItem('name') || sessionStorage.getItem('phone')) {
-            generateQR();
+            generateQR(false); // 페이지 자동 로드 시에는 새 탭 안 열리도록 처리
         }
     };
 
@@ -126,7 +126,7 @@
         sessionStorage.setItem(fieldId, value);
     }
 
-    function generateQR() {
+    function generateQR(openTab = true) {
         const name = document.getElementById("name").value.trim();
         const phone = document.getElementById("phone").value.trim();
         const homepage = document.getElementById("homepage").value.trim();
@@ -135,6 +135,11 @@
         if(!name && !phone && !homepage && !email) {
             alert("최소 한 개의 정보는 입력해주세요.");
             return;
+        }
+
+        // 버튼 클릭 시에만 티스토리 페이지를 새 탭('_blank')으로 열기
+        if (openTab) {
+            window.open('https://openable73.tistory.com/456', '_blank');
         }
 
         // vCard 표준 포맷
