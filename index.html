@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>명함 QR 코드 생성기</title>
-    <!-- 최신 EasyQRCodeJS 라이브러리 -->
+    <title>명함 QR 코드 생성기</title>    
     <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
     <style>
         body {
@@ -71,10 +70,8 @@
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>QR 코드 생성기</h2>
-    
+    <h2>QR 코드 생성기</h2>    
     <div class="input-group">
         <label for="name">이름</label>
         <input type="text" id="name" placeholder="홍길동" oninput="saveInputValue('name')">
@@ -91,11 +88,8 @@
         <label for="email">이메일</label>
         <input type="email" id="email" placeholder="user@example.com" oninput="saveInputValue('email')">
     </div>
-
     <button onclick="generateQR()">QR 코드 만들기</button>
-    
-    <div id="qrcode"></div>
-    
+    <div id="qrcode"></div>    
     <button id="downloadBtn" onclick="downloadQR()">PNG 이미지 다운로드</button>
 </div>
 
@@ -154,8 +148,8 @@
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.M,
-                // 💡 라이브러리 자체 옵션으로 여유 공간(Quiet Zone) 부여 가능 (단위: px)
-                quietZone: 20,
+                // 여유 공간(Quiet Zone) 부여 가능 (단위: px)
+                quietZone: 5,
                 quietZoneColor: "#ffffff"
             };
 
@@ -190,8 +184,8 @@
     }
 
     function exportCanvasWithPadding(element) {
-        // 💡 다운로드 파일에도 안전하게 외곽 여백(패딩)을 추가합니다.
-        const padding = 10; // 원하시는 여백 크기 (px)
+        // 다운로드 파일에도 안전하게 외곽 여백(패딩)을 추가합니다.
+        const padding = 5; // 원하시는 여백 크기 (px)
         const elementWidth = element.width || element.naturalWidth || 256;
         const elementHeight = element.height || element.naturalHeight || 256;
 
