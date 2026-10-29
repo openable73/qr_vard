@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>명함 QR 코드 생성기</title>
-    <!-- 한글 및 vCard를 완벽 지원하는 최신 QR 코드 라이브러리(EasyQRCodeJS) 로드 -->
+    <!-- 한글 및 vCard를 지원하는 QR 코드 라이브러리(EasyQRCodeJS) 로드 -->
     <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
     <style>
         body {
@@ -58,11 +58,17 @@
             margin-top: 10px;
         }
         button:hover { background-color: #0056b3; }
+        
+        /* QR 코드 출력 영역 및 외곽 여백 수정 */
         #qrcode {
             margin: 25px auto;
-            display: flex;
-            justify-content: center;
+            padding: 15px; /* 내부 여백 추가 */
+            background-color: #ffffff; /* QR 테두리 배경 */
+            border: 1px solid #eeeeee; /* 아주 연한 외곽선으로 구분 */
+            border-radius: 8px;
+            display: inline-block; /* 중앙 정렬 유지 */
         }
+        
         #downloadBtn {
             background-color: #28a745;
             display: none;
@@ -104,7 +110,7 @@
     let qrcodeContainer = document.getElementById("qrcode");
     let qrInstance = null;
 
-    // 페이지가 로드될 때 세션 스토리지에 저장된 값이 있으면 입력창에 복원
+    // 페이지 로드 시 기존 세션스토리지 값 복원
     window.onload = function() {
         const fields = ['name', 'phone', 'homepage', 'email'];
         fields.forEach(field => {
@@ -114,13 +120,11 @@
             }
         });
 
-        // 이전 세션에 입력된 값이 있었다면 자동으로 QR 코드 생성
         if (sessionStorage.getItem('name') || sessionStorage.getItem('phone')) {
             generateQR();
         }
     };
 
-    // 입력값이 바뀔 때마다 세션 스토리지에 즉시 저장
     function saveInputValue(fieldId) {
         const value = document.getElementById(fieldId).value;
         sessionStorage.setItem(fieldId, value);
@@ -137,7 +141,6 @@
             return;
         }
 
-        // vCard 표준 포맷
         const vcardData = [
             'BEGIN:VCARD',
             'VERSION:3.0',
@@ -154,11 +157,15 @@
         try {
             const options = {
                 text: vcardData,
-                width: 256,
-                height: 256,
+                width: 230,
+                height: 230,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
+                correctLevel: QRCode.CorrectLevel.M,
+                
+                // === QR 코드 자체 외곽 여백(Quiet Zone) 설정 ===
+                quietZone: 15,
+                quietZoneColor: "#ffffff"
             };
 
             qrInstance = new QRCode(qrcodeContainer, options);
