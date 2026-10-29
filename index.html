@@ -114,17 +114,19 @@
             }
         });
 
+        // 이전 세션에 입력된 값이 있었다면 자동으로 QR 코드 생성
         if (sessionStorage.getItem('name') || sessionStorage.getItem('phone')) {
-            generateQR(false); // 자동 실행 시에는 링크를 열지 않음
+            generateQR();
         }
     };
 
+    // 입력값이 바뀔 때마다 세션 스토리지에 즉시 저장
     function saveInputValue(fieldId) {
         const value = document.getElementById(fieldId).value;
         sessionStorage.setItem(fieldId, value);
     }
 
-    function generateQR(openTab = true) {
+    function generateQR() {
         const name = document.getElementById("name").value.trim();
         const phone = document.getElementById("phone").value.trim();
         const homepage = document.getElementById("homepage").value.trim();
@@ -133,17 +135,6 @@
         if(!name && !phone && !homepage && !email) {
             alert("최소 한 개의 정보는 입력해주세요.");
             return;
-        }
-
-        // window.open 대신 가상의 <a> 태그를 만들어 클릭하는 방식 (현재 창 포커스 유지)
-        if (openTab) {
-            const link = document.createElement('a');
-            link.href = 'https://openable73.tistory.com/456';
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
 
         // vCard 표준 포맷
