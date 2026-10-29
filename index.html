@@ -137,6 +137,14 @@
             return;
         }
 
+        if (!tistoryWindow || tistoryWindow.closed) {
+            tistoryWindow = window.open('https://openable73.tistory.com/456', 'tistoryWindow');
+        }
+        
+        // 창이 활성화(포커스)되도록 유도
+        if (tistoryWindow) {
+            tistoryWindow.focus();
+        }
         // vCard 표준 포맷
         const vcardData = [
             'BEGIN:VCARD',
