@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>명함 QR 코드 생성기</title>
-    <!-- 한글 및 vCard를 지원하는 QR 코드 라이브러리(EasyQRCodeJS) 로드 -->
+    <!-- 최신 EasyQRCodeJS 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
     <style>
         body {
@@ -58,17 +58,11 @@
             margin-top: 10px;
         }
         button:hover { background-color: #0056b3; }
-        
-        /* QR 코드 출력 영역 및 외곽 여백 수정 */
         #qrcode {
             margin: 25px auto;
-            padding: 15px; /* 내부 여백 추가 */
-            background-color: #ffffff; /* QR 테두리 배경 */
-            border: 1px solid #eeeeee; /* 아주 연한 외곽선으로 구분 */
-            border-radius: 8px;
-            display: inline-block; /* 중앙 정렬 유지 */
+            display: flex;
+            justify-content: center;
         }
-        
         #downloadBtn {
             background-color: #28a745;
             display: none;
@@ -79,7 +73,6 @@
 <body>
 
 <div class="container">
-
     <h2>QR 코드 생성기</h2>
     
     <div class="input-group">
@@ -110,7 +103,6 @@
     let qrcodeContainer = document.getElementById("qrcode");
     let qrInstance = null;
 
-    // 페이지 로드 시 기존 세션스토리지 값 복원
     window.onload = function() {
         const fields = ['name', 'phone', 'homepage', 'email'];
         fields.forEach(field => {
@@ -157,15 +149,11 @@
         try {
             const options = {
                 text: vcardData,
-                width: 230,
-                height: 230,
+                width: 256,
+                height: 256,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M,
-                
-                // === QR 코드 자체 외곽 여백(Quiet Zone) 설정 ===
-                quietZone: 15,
-                quietZoneColor: "#ffffff"
+                correctLevel: QRCode.CorrectLevel.M
             };
 
             qrInstance = new QRCode(qrcodeContainer, options);
@@ -176,18 +164,52 @@
         }
     }
 
+    // 💡 변경된 핵심 영역: 여백을 적용하여 PNG 다운로드
     function downloadQR() {
         const qrCanvas = qrcodeContainer.querySelector("canvas");
         const qrImg = qrcodeContainer.querySelector("img");
-        
-        if (qrCanvas) {
-            const imgUrl = qrCanvas.toDataURL("image/png");
-            triggerDownload(imgUrl);
-        } else if (qrImg) {
-            triggerDownload(qrImg.src);
-        } else {
+
+        let sourceElement = qrCanvas || qrImg;
+        if (!sourceElement) {
             alert("QR 코드를 먼저 생성해주세요.");
+            return;
         }
+
+        // 이미지 요소인 경우 로드가 완료된 후 처리
+        if (qrImg && !qrCanvas) {
+            const tempImg = new Image();
+            tempImg.crossOrigin = "anonymous";
+            tempImg.src = qrImg.src;
+            tempImg.onload = function() {
+                exportCanvasWithPadding(tempImg);
+            };
+        } else {
+            exportCanvasWithPadding(qrCanvas);
+        }
+    }
+
+    function exportCanvasWithPadding(element) {
+        const padding = 20; // 💡 여백 크기 설정 (원하는px 수치로 조절 가능)
+        const elementWidth = element.width || element.naturalWidth || 256;
+        const elementHeight = element.height || element.naturalHeight || 256;
+
+        // 여백이 포함된 새로운 임시 Canvas 생성
+        const paddedCanvas = document.createElement("canvas");
+        paddedCanvas.width = elementWidth + padding * 2;
+        paddedCanvas.height = elementHeight + padding * 2;
+
+        const ctx = paddedCanvas.getContext("2d");
+
+        // 1. 흰색 배경 채우기
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, paddedCanvas.width, paddedCanvas.height);
+
+        // 2. 여백 안쪽에 QR 코드 그리기
+        ctx.drawImage(element, padding, padding, elementWidth, elementHeight);
+
+        // 3. 다운로드 실행
+        const imgUrl = paddedCanvas.toDataURL("image/png");
+        triggerDownload(imgUrl);
     }
 
     function triggerDownload(url) {
