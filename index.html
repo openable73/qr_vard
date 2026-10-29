@@ -153,7 +153,10 @@
                 height: 256,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
+                correctLevel: QRCode.CorrectLevel.M,
+                // 💡 라이브러리 자체 옵션으로 여유 공간(Quiet Zone) 부여 가능 (단위: px)
+                quietZone: 20,
+                quietZoneColor: "#ffffff"
             };
 
             qrInstance = new QRCode(qrcodeContainer, options);
@@ -164,7 +167,6 @@
         }
     }
 
-    // 💡 변경된 핵심 영역: 여백을 적용하여 PNG 다운로드
     function downloadQR() {
         const qrCanvas = qrcodeContainer.querySelector("canvas");
         const qrImg = qrcodeContainer.querySelector("img");
@@ -175,7 +177,6 @@
             return;
         }
 
-        // 이미지 요소인 경우 로드가 완료된 후 처리
         if (qrImg && !qrCanvas) {
             const tempImg = new Image();
             tempImg.crossOrigin = "anonymous";
@@ -189,11 +190,11 @@
     }
 
     function exportCanvasWithPadding(element) {
-        const padding = 20; // 💡 여백 크기 설정 (원하는px 수치로 조절 가능)
+        // 💡 다운로드 파일에도 안전하게 외곽 여백(패딩)을 추가합니다.
+        const padding = 30; // 원하시는 여백 크기 (px)
         const elementWidth = element.width || element.naturalWidth || 256;
         const elementHeight = element.height || element.naturalHeight || 256;
 
-        // 여백이 포함된 새로운 임시 Canvas 생성
         const paddedCanvas = document.createElement("canvas");
         paddedCanvas.width = elementWidth + padding * 2;
         paddedCanvas.height = elementHeight + padding * 2;
